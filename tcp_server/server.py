@@ -1,7 +1,5 @@
 import socket
 import sys
-<<<<<<< HEAD
-=======
 import requests
 import json
 
@@ -28,4 +26,3 @@ while True:
                 
     finally:
         connection.close()
->>>>>>> 0db99070ce2a489d339e76707d927681efc2cfff
