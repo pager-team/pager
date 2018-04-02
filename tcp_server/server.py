@@ -3,10 +3,10 @@ import sys
 import requests
 import json
 
-URL = "127.0.0.1:8080/pager"
+URL = "http://localhost:6969/api/v1/pagers/{}/connect/{}"
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_address = ('localhost', 8000)
+server_address = ('localhost', 8005)
 sock.bind(server_address)
 sock.listen(1)
 
@@ -14,15 +14,13 @@ while True:
     connection, client_address = sock.accept()
     try:
         while True:
-            data = json.loads(connection.recv(32))
-            if not requests.get("{0}/{1}".format(URL, data['id']).json:
-                code = 1
-                print("accepted connection")
-            else:
-                print("rejected connection")
-                code = 0
-            connection.sendall(json.dumps({"type": "pair", "code": code}))
-            
-                
+            data = connection.recv(32).decode()
+
+            data = json.loads(data)
+
+            res = requests.post(URL.format(data["id"], client_address[1]))
+
+            exit()
+
     finally:
         connection.close()
