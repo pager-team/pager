@@ -5,11 +5,12 @@ const app = new Vue({
     pagers: []
   },
   mounted: function() {
-    fetch("http://localhost:8080/pager")
+    fetch("http://localhost:6969/api/v1/pagers")
       .then(res => {
         return res.json();
       })
       .then(json => {
+        console.log(json);
         this.pagers = json.pagers;
       })
       .catch(e => {
@@ -20,13 +21,14 @@ const app = new Vue({
     giveToCustomer: pager_id => {
       fetch({
         method: "POST",
-        url: `http://localhost:8080/pager/issue-to-customer/${pager_id}`,
-      }).then(res => {
-        return res.json();
+        url: `http://localhost:8080/pager/issue-to-customer/${pager_id}`
       })
-      .then((json) => {
+        .then(res => {
+          return res.json();
+        })
+        .then(json => {
           console.log(json);
-      });
+        });
     }
   }
 });

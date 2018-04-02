@@ -1,6 +1,7 @@
 import Promise from "bluebird";
 import db from "../../lib/db";
-import websocket from "../../lib/websocket";
+import socketio from "socket.io";
+import http from "http";
 
 const models = {};
 
@@ -34,18 +35,28 @@ models.getPager = pagerId => {
   });
 };
 
-models.confirmNewPager = (pagerId, portNumber) => {
+models.confirmNewPager = (pagerId, portNumber, io, emitter) => {
   return new Promise((resolve, reject) => {
-    websocket.emit("newPager", { pagerId, portNumber });
+    io.emit("newPager", { pagerId, portNumber });
 
-    websocket.on("newPagerResponse", res => {
-      if (!res) {
-        reject(new Error("rejected"));
+    emitter.on("newPagerResponse", res => {
+      if (res) {
+        resolve(true);
         return;
       }
-
-      resolve();
+      reject(new Error("Not authorized"));
     });
+  });
+};
+
+models.addPager = (pagerId, portNumber) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      await db.query("INSERT INTO pagers VALUES (?, ?)", [pagerId, portNumber]);
+      resolve();
+    } catch (e) {
+      reject(e);
+    }
   });
 };
 

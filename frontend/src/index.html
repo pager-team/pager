@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Pager Solution</title>
+</head>
+<body>
+    <div id="app">
+      </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.0/socket.io.dev.js"></script>
+    <script>
+      
+      const socket = io("http://127.0.0.1:8000/");
+      console.log("I made it"); 
+      socket.on("newPager", (pager) => {
+        const didConfirm = confirm(`Do you want to add user on port ${pager.portNumber} with id: ${pager.portId}`)
+
+        if (didConfirm) {
+          socket.emit("newPagerResponse", true); 
+        } else {
+          socket.emit("newPagerResponse", false); 
+        }
+        
+      });
+
+  
+
+      
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-resource/1.5.0/vue-resource.min.js" ></script>
+    <script type="text/javascript" src="./app.js"></script>
+</body>
+</html>

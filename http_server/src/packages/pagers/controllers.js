@@ -22,6 +22,9 @@ router.get("/:pagerId", async (req, res) => {
 router.get("/:pagerId/connect/:portNumber", async (req, res) => {
   const pagerId = Number(req.params.pagerId);
   const portNumber = Number(req.params.portNumber);
+  const io = req.app.get("socketio");
+  const emitter = req.app.get("emitter");
+  console.log(emitter);
 
   try {
     if (isNaN(pagerId) || isNaN(portNumber)) {
@@ -35,9 +38,11 @@ router.get("/:pagerId/connect/:portNumber", async (req, res) => {
       return;
     }
 
-    await models.confirmNewPager(pagerId, portNumber);
+    await models.confirmNewPager(pagerId, portNumber, io, emitter);
+    console.log(pagerId);
+    await models.addPager(pagerId, portNumber);
 
-    res.json(200);
+    res.sendStatus(200);
   } catch (e) {
     res.json({ response: "ERROR" });
   }
