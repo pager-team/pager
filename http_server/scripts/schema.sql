@@ -1,4 +1,4 @@
--- MySQL dump 10.13  Distrib 5.7.21, for osx10.12 (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.21, for osx10.13 (x86_64)
 --
 -- Host: localhost    Database: pager
 -- ------------------------------------------------------
@@ -34,6 +34,21 @@ CREATE TABLE `orders` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `pager_dates`
+--
+
+DROP TABLE IF EXISTS `pager_dates`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `pager_dates` (
+  `pager_date_id` int(11) NOT NULL AUTO_INCREMENT,
+  `pager_start_time` int(11) NOT NULL,
+  `pager_end_time` int(11) NOT NULL,
+  PRIMARY KEY (`pager_date_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `pagers`
 --
 
@@ -43,6 +58,7 @@ DROP TABLE IF EXISTS `pagers`;
 CREATE TABLE `pagers` (
   `pager_id` int(11) NOT NULL,
   `pager_port` int(11) NOT NULL,
+  `pager_connected` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`pager_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -56,4 +72,4 @@ CREATE TABLE `pagers` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-04-01 17:01:53
+-- Dump completed on 2018-04-02 19:46:33

@@ -3,10 +3,17 @@ import bodyParser from "express";
 import pagers from "./packages/pagers/controllers";
 import socketio from "socket.io";
 import EventEmitter from "events";
+import net from "net";
+import cors from "cors";
 
 const app = express();
 
 const io = socketio.listen(8000);
+const client = new net.Socket();
+
+/*client.connect(8005, "127.0.0.1", () => {*/
+//app.set("client", client);
+/*});*/
 
 const emitter = new EventEmitter();
 
@@ -23,6 +30,7 @@ const router = express.Router();
 
 // Middleware
 router.use(bodyParser.json());
+router.use(cors());
 
 router.use("/pagers", pagers);
 

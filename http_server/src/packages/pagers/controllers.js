@@ -7,7 +7,7 @@ router.get("/", async (req, res) => {
   try {
     res.json(await models.getAllPagers());
   } catch (e) {
-    res.json({ response: "ERROR" });
+    res.sendStatus(500);
   }
 });
 
@@ -15,7 +15,7 @@ router.get("/:pagerId", async (req, res) => {
   try {
     res.json(await models.getPager(req.params.pagerId));
   } catch (e) {
-    res.json({ response: "ERROR" });
+    res.sendStatus(500);
   }
 });
 
@@ -27,12 +27,13 @@ router.post("/:pagerId/connect/:portNumber", async (req, res) => {
 
   try {
     if (isNaN(pagerId) || isNaN(portNumber)) {
-      res.json({ response: "ERROR" });
+      res.sendStatus(400);
       return;
     }
 
     // If pager does exist, send success message
     if (await models.getPager(pagerId)) {
+      await models.pagerConnected(pagerId);
       res.sendStatus(200);
       return;
     }
@@ -42,7 +43,69 @@ router.post("/:pagerId/connect/:portNumber", async (req, res) => {
 
     res.sendStatus(200);
   } catch (e) {
-    res.json({ response: "ERROR" });
+    res.sendStatus(500);
+  }
+});
+
+router.post("/:portNumber/disconnect", async (req, res) => {
+  const portNumber = Number(req.params.portNumber);
+
+  try {
+    if (isNaN(portNumber)) {
+      res.sendStatus(400);
+      return;
+    }
+
+    await models.pagerDisconnected(portNumber);
+    res.sendStatus(200);
+  } catch (e) {
+    res.sendStatus(500);
+  }
+});
+
+router.post("/:pagerId/activate/:orderId", async (req, res) => {
+  const pagerId = Number(req.params.pagerId);
+  const orderId = Number(req.params.orderId);
+
+  try {
+    if (isNaN(pagerId) || isNaN(orderId)) {
+      res.sendStatus(400);
+      return;
+    }
+
+    // Check if pagerId is already activated
+    if (await models.alreadyActivated(pagerId)) {
+      res.sendStatus(400);
+      return;
+    }
+
+    await models.activatePager(orderId, pagerId);
+
+    res.sendStatus(200);
+  } catch (e) {
+    console.log(e);
+    res.sendStatus(500);
+  }
+});
+
+router.post("/:pagerId/ring", async (req, res) => {
+  const pagerId = Number(req.params.pagerId);
+  try {
+    if (isNaN(pagerId)) {
+      res.sendStatus(400);
+      return;
+    }
+
+    if (!await models.alreadyActivated(pagerId)) {
+      res.sendStatus(400);
+      return;
+    }
+
+    await models.sendRingMessage(pagerId, req.app.get("client"));
+
+    res.sendStatus(200);
+  } catch (e) {
+    res.sendStatus(500);
   }
 });
 
