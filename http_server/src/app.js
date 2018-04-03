@@ -11,9 +11,14 @@ const app = express();
 const io = socketio.listen(8000);
 const client = new net.Socket();
 
-/*client.connect(8005, "127.0.0.1", () => {*/
-//app.set("client", client);
-/*});*/
+client.connect(8005, "127.0.0.1", () => {
+  client.write("server");
+  app.set("client", client);
+
+  client.on("error", err => {
+    console.log(err);
+  });
+});
 
 const emitter = new EventEmitter();
 

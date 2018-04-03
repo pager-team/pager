@@ -139,4 +139,31 @@ models.sendRingMessage = (pagerId, client) => {
   });
 };
 
+models.updatePort = (pagerId, portNumber) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      await db.query("UPDATE pagers SET pager_port = ? WHERE pager_id = ?", [
+        portNumber,
+        pagerId
+      ]);
+      resolve();
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+
+models.deactivatePager = (pagerId, client) => {
+  return new Promise(async (resolve, reject) => {
+    const rows = await db.query(
+      "SELECT pager_port FROM pagers WHERE pager_id = ?",
+      [pagerId]
+    );
+
+    client.write(
+      JSON.stringify({ type: "deactivate", pager_port: rows[0].pager_port })
+    );
+  });
+};
+
 export default models;

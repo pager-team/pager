@@ -5,7 +5,7 @@ const app = new Vue({
     pagers: []
   },
   mounted: function() {
-    fetch("http://localhost:6969/api/v1/pagers")
+    fetch("http://localhost:8080/api/v1/pagers")
       .then(res => {
         return res.json();
       })

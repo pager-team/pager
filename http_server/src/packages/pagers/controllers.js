@@ -33,6 +33,7 @@ router.post("/:pagerId/connect/:portNumber", async (req, res) => {
 
     // If pager does exist, send success message
     if (await models.getPager(pagerId)) {
+      await models.updatePort(pagerId, portNumber);
       await models.pagerConnected(pagerId);
       res.sendStatus(200);
       return;
@@ -102,6 +103,23 @@ router.post("/:pagerId/ring", async (req, res) => {
     }
 
     await models.sendRingMessage(pagerId, req.app.get("client"));
+
+    res.sendStatus(200);
+  } catch (e) {
+    res.sendStatus(500);
+  }
+});
+
+router.post("/:pagerId/deactivate", async (req, res) => {
+  const pagerId = Number(req.params.pagerId);
+
+  try {
+    if (!await models.alreadyActivated(pagerId)) {
+      res.sendStatus(400);
+      return;
+    }
+
+    models.deactivatePager(pagerId, req.app.get("client"));
 
     res.sendStatus(200);
   } catch (e) {

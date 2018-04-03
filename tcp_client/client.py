@@ -27,10 +27,17 @@ try:
 
     sock.sendall(json.dumps({"id": pager_id, "type": "pair"}).encode())
     while 1:
-        data = json.loads(sock.recv(32))
-        if data["code"] == 0:
-            raise ValueError("REJECTED")
-        print()
+        data = sock.recv(32).decode()
+
+        if not data:
+            exit()
+
+        json_data = json.loads(data)
+
+        if json_data["type"] == "ring":
+            print("I am ringing!")
+        elif json_data["type"] == "deactivate":
+            print("I have deactivated")
 
 finally:
     sock.close()
