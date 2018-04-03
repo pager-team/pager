@@ -5,12 +5,30 @@ import http from "http";
 
 const models = {};
 
-models.getAllPagers = () => {
+models.getAllPagers = connected => {
   return new Promise(async (resolve, reject) => {
     try {
-      resolve(await db.query("SELECT * FROM pagers"));
+      const rows = await db.query(
+        "SELECT pager_id, pager_port, pager_connected, pager_status FROM pagers"
+      );
+
+      if (!connected) {
+        resolve(rows);
+        return;
+      }
+
+      const pagers = { connected: [], disconnected: [] };
+
+      for (const pager of rows) {
+        if (pager.pager_connected) {
+          pagers.connected.push(pager);
+        } else {
+          pagers.disconnected.push(pager);
+        }
+      }
+
+      resolve(pagers);
     } catch (e) {
-      console.log(e);
       reject(e);
     }
   });
@@ -52,7 +70,7 @@ models.confirmNewPager = (pagerId, portNumber, io, emitter) => {
 models.addPager = (pagerId, portNumber) => {
   return new Promise(async (resolve, reject) => {
     try {
-      await db.query("INSERT INTO pagers VALUES (?, ?, DEFAULT)", [
+      await db.query("INSERT INTO pagers VALUES (?, ?, DEFAULT, DEFAULT)", [
         pagerId,
         portNumber
       ]);
@@ -78,7 +96,7 @@ models.pagerDisconnected = pagerPort => {
   return new Promise(async (resolve, reject) => {
     try {
       await db.query(
-        "UPDATE pagers SET pager_connected = ? WHERE pager_port = ? and pager_connected = ?",
+        "UPDATE pagers SET pager_connected = ?, pager_status = 0 WHERE pager_port = ? and pager_connected = ?",
         [false, pagerPort, true]
       );
       resolve();
@@ -93,11 +111,16 @@ models.alreadyActivated = pagerId => {
   return new Promise(async (resolve, reject) => {
     try {
       const rows = await db.query(
-        "SELECT * FROM orders WHERE order_end IS NULL AND order_pager_id = ?",
+        "SELECT pager_status FROM pagers WHERE pager_id= ?",
         [pagerId]
       );
 
-      if (rows.length) {
+      if (!rows.length) {
+        reject(new Error("Pager doesn't exist"));
+        return;
+      }
+
+      if (rows[0].pager_status != 0) {
         resolve(true);
         return;
       }
@@ -114,9 +137,13 @@ models.activatePager = (orderId, pagerId) => {
   return new Promise(async (resolve, reject) => {
     try {
       await db.query(
-        "INSERT INTO orders VALUES (?, ?, UNIX_TIMESTAMP(), DEFAULT)",
+        "INSERT INTO orders VALUES (?, ?, UNIX_TIMESTAMP(), DEFAULT, DEFAULT)",
         [orderId, pagerId]
       );
+
+      await db.query("UPDATE pagers SET pager_status = 1 WHERE pager_id = ?", [
+        pagerId
+      ]);
       resolve();
     } catch (e) {
       reject(e);
@@ -130,6 +157,15 @@ models.sendRingMessage = (pagerId, client) => {
       "SELECT pager_port FROM pagers WHERE pager_id = ?",
       [pagerId]
     );
+
+    await db.query(
+      "UPDATE orders SET order_ring_date = UNIX_TIMESTAMP() WHERE order_pager_id = ?",
+      [pagerId]
+    );
+
+    await db.query("UPDATE pagers SET pager_status = 2 WHERE pager_id = ?", [
+      pagerId
+    ]);
 
     client.write(
       JSON.stringify({ type: "ring", pager_port: rows[0].pager_port })
@@ -160,9 +196,37 @@ models.deactivatePager = (pagerId, client) => {
       [pagerId]
     );
 
+    await db.query(
+      "UPDATE orders SET order_end = UNIX_TIMESTAMP() WHERE order_pager_id = ?",
+      [pagerId]
+    );
+
+    await db.query("UPDATE pagers SET pager_status = 0 WHERE pager_id = ?", [
+      pagerId
+    ]);
+
     client.write(
       JSON.stringify({ type: "deactivate", pager_port: rows[0].pager_port })
     );
+  });
+};
+
+models.orderIdExists = orderId => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const rows = await db.query(
+        "SELECT order_id FROM orders WHERE order_id = ?",
+        [orderId]
+      );
+
+      if (rows.length) {
+        resolve(true);
+      }
+
+      resolve(false);
+    } catch (e) {
+      reject(e);
+    }
   });
 };
 

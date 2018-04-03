@@ -5,33 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Pager Solution</title>
+
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" type="text/css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/7.18.0/sweetalert2.css" type="text/css">
+
 </head>
 <body>
-    <div id="app">
+  <div id="app">
+
+    <h1>Pager System</h1>
+    
+    <h3>All Pagers</h3>
+
+    <table class="striped" style="width: 600px" > 
+      <thead>
+        <tr>
+          <td>Pager ID</td>
+          <td>Pater Port</td>
+          <td>Pager Status</td>
+          <td>Action</td>
+          <td>Order ID</td>
+        </tr>
+
+        <tbody>
+          
+          <tr v-for="pager, index in pagers">
+            <td>{{ pager.pager_id }}</td>
+            <td>{{ pager.pager_port }}</td>
+            <td><i class="fa fa-circle" v-bind:style="{color: pager.pager_connected ? '#2ecc71' : '#e74c3c'}"></i></td>
+            <td><a v-on:click="doAction(pager.pager_id, pager.pager_status, index)" class="waves-effect waves-light btn" >
+                <span v-if="pager.pager_status == 0">Activate</span>
+                <span v-if="pager.pager_status == 1">Ring</span>
+                <span v-if="pager.pager_status == 2">Deactivate</span>
+                
+                
+            </a></td>  
+            <td><input v-model="orderId" type="text"></td>
+          </tr>
+        </tbody>
+      </thead>
+
+    </table>
       </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.0/socket.io.dev.js"></script>
     <script>
       
-      const socket = io("http://127.0.0.1:8000/");
-      console.log("I made it"); 
-      socket.on("newPager", (pager) => {
-        const didConfirm = confirm(`Do you want to add user on port ${pager.portNumber} with id: ${pager.portId}`)
-
-        if (didConfirm) {
-          socket.emit("newPagerResponse", true); 
-        } else {
-          socket.emit("newPagerResponse", false); 
-        }
-        
-      });
-
-  
-
-      
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-resource/1.5.0/vue-resource.min.js" ></script>
+
+        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-resource/1.5.0/vue-resource.min.js" ></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/7.18.0/sweetalert2.all.min.js"></script>
     <script type="text/javascript" src="./app.js"></script>
 </body>
 </html>

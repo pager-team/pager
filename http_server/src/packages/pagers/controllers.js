@@ -4,8 +4,9 @@ import models from "./models";
 const router = express.Router();
 
 router.get("/", async (req, res) => {
+  const connected = req.query.connected ? true : false;
   try {
-    res.json(await models.getAllPagers());
+    res.json(await models.getAllPagers(connected));
   } catch (e) {
     res.sendStatus(500);
   }
@@ -71,6 +72,12 @@ router.post("/:pagerId/activate/:orderId", async (req, res) => {
   try {
     if (isNaN(pagerId) || isNaN(orderId)) {
       res.sendStatus(400);
+      return;
+    }
+
+    // Check if the orderId already exists
+    if (await models.orderIdExists(orderId)) {
+      res.sendStatus(403);
       return;
     }
 
