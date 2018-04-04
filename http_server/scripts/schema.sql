@@ -26,7 +26,8 @@ CREATE TABLE `orders` (
   `order_id` int(11) NOT NULL,
   `order_pager_id` int(11) NOT NULL,
   `order_start` int(11) NOT NULL,
-  `order_end` int(11) NOT NULL,
+  `order_end` int(11) DEFAULT NULL,
+  `order_ring_date` int(11) DEFAULT NULL,
   PRIMARY KEY (`order_id`),
   KEY `order_pager_id` (`order_pager_id`),
   CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`order_pager_id`) REFERENCES `pagers` (`pager_id`)
@@ -59,6 +60,7 @@ CREATE TABLE `pagers` (
   `pager_id` int(11) NOT NULL,
   `pager_port` int(11) NOT NULL,
   `pager_connected` tinyint(1) NOT NULL DEFAULT '1',
+  `pager_status` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`pager_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -72,4 +74,4 @@ CREATE TABLE `pagers` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-04-02 19:46:33
+-- Dump completed on 2018-04-04 13:14:57

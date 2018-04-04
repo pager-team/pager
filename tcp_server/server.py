@@ -33,7 +33,6 @@ outputs = []
 authenticated_clients = {}
 
 while True:
-
     inputs_ready, outputs_ready, _ = select.select(inputs, outputs, [])
 
     for socket in inputs_ready:
